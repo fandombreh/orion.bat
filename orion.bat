@@ -1,7 +1,7 @@
 @echo off
-title Orion Tools - Roblox Utilities
+title Orion Tools - Roblox Utilities v1.4
 color 0a
-mode con: cols=85 lines=35
+mode con: cols=90 lines=35
 
 :: Admin check
 NET SESSION >nul 2>&1
@@ -11,20 +11,17 @@ if %errorLevel% == 0 (
     set "admin="
 )
 
-:: Set version
-set "version=1.2"
-
 :: Main Menu
 :menu
 cls
 echo.
 echo  -------------------------------------------------------
-echo               ORION TOOLS v%version% %admin%                      
+echo               ORION TOOLS v1.4 %admin%                      
 echo  -------------------------------------------------------
 echo.
 echo   1. Force Live Channel + Latest Version
 echo   2. Auto Downgrade Roblox
-echo   3. Download Bloxstrap / Fishstrap
+echo   3. Manage Bootstrappers (Bloxstrap/Fishstrap)
 echo   4. Find Executor Discords
 echo   5. Kill Roblox Processes
 echo   6. Check Roblox Version
@@ -36,7 +33,7 @@ set /p choice=Choose an option (1-9):
 
 if "%choice%"=="1" goto force_live
 if "%choice%"=="2" goto downgrade
-if "%choice%"=="3" goto download_mods
+if "%choice%"=="3" goto bootstrappers
 if "%choice%"=="4" goto exec_discords
 if "%choice%"=="5" goto kill_roblox
 if "%choice%"=="6" goto check_version
@@ -145,37 +142,135 @@ echo Invalid choice!
 timeout /t 1 >nul
 goto downgrade
 
-:download_mods
+:bootstrappers
 cls
-echo [Roblox Mods Downloader]
+echo [Bootstrapper Manager]
 echo -------------------------------
-echo 1. Bloxstrap (Custom Roblox Launcher)
-echo 2. Fishstrap (Alternative Mod)
-echo 3. Open Mods Collection Page
-echo 4. Back to menu
+echo Searching for installed bootstrappers...
 echo.
-set /p mod_choice=Choose (1-4): 
 
-if "%mod_choice%"=="1" (
+:: Reset detection variables
+set "bloxstrap_found=0"
+set "fishstrap_found=0"
+set "bloxstrap_path="
+set "fishstrap_path="
+
+:: Check common Bloxstrap locations
+for %%D in (
+    "%ProgramData%\Bloxstrap"
+    "%LOCALAPPDATA%\Programs\Bloxstrap"
+    "%APPDATA%\Bloxstrap"
+    "%SystemDrive%\Bloxstrap"
+) do (
+    if exist "%%D" (
+        for /f "delims=" %%F in ('dir /b /s "%%D\Bloxstrap.exe" 2^>nul') do (
+            set "bloxstrap_path=%%F"
+            set "bloxstrap_found=1"
+        )
+    )
+)
+
+:: Check common Fishstrap locations
+for %%D in (
+    "%LOCALAPPDATA%\Programs\fishstrap"
+    "%APPDATA%\fishstrap"
+    "%SystemDrive%\fishstrap"
+) do (
+    if exist "%%D" (
+        for /f "delims=" %%F in ('dir /b /s "%%D\Fishstrap.exe" 2^>nul') do (
+            set "fishstrap_path=%%F"
+            set "fishstrap_found=1"
+        )
+    )
+)
+
+:: Display results
+if %bloxstrap_found% equ 1 (
+    echo [1] Bloxstrap found at:
+    echo %bloxstrap_path%
+    echo.
+) else (
+    echo [1] Bloxstrap not found
+    echo.
+)
+
+if %fishstrap_found% equ 1 (
+    echo [2] Fishstrap found at:
+    echo %fishstrap_path%
+    echo.
+) else (
+    echo [2] Fishstrap not found
+    echo.
+)
+
+echo 3. Download Bloxstrap
+echo 4. Download Fishstrap
+echo 5. Uninstall Bloxstrap
+echo 6. Uninstall Fishstrap
+echo 7. Back to menu
+echo.
+set /p bs_choice=Choose an option (1-7): 
+
+:: Handle found bootstrappers
+if "%bs_choice%"=="1" if %bloxstrap_found% equ 1 (
+    echo Launching Bloxstrap...
+    start "" "%bloxstrap_path%"
+    timeout /t 2 >nul
+    goto bootstrappers
+)
+
+if "%bs_choice%"=="2" if %fishstrap_found% equ 1 (
+    echo Launching Fishstrap...
+    start "" "%fishstrap_path%"
+    timeout /t 2 >nul
+    goto bootstrappers
+)
+
+:: Download options
+if "%bs_choice%"=="3" (
     start "" "https://github.com/bloxstraplabs/bloxstrap/releases/latest"
     echo Opening Bloxstrap download page...
-    goto download_mods
+    timeout /t 2 >nul
+    goto bootstrappers
 )
-if "%mod_choice%"=="2" (
+
+if "%bs_choice%"=="4" (
     start "" "https://github.com/fishstrap/fishstrap/releases"
     echo Opening Fishstrap download page...
-    goto download_mods
+    timeout /t 2 >nul
+    goto bootstrappers
 )
-if "%mod_choice%"=="3" (
-    start "" "https://github.com/topics/roblox-mods"
-    echo Opening Roblox mods collection...
-    goto download_mods
+
+:: Uninstall options
+if "%bs_choice%"=="5" if %bloxstrap_found% equ 1 (
+    echo Uninstalling Bloxstrap...
+    if exist "%bloxstrap_path%" (
+        start /wait "" "%bloxstrap_path%" /uninstall
+        echo Bloxstrap uninstall initiated...
+    ) else (
+        echo Could not find Bloxstrap installer!
+    )
+    pause
+    goto bootstrappers
 )
-if "%mod_choice%"=="4" goto menu
+
+if "%bs_choice%"=="6" if %fishstrap_found% equ 1 (
+    echo Uninstalling Fishstrap...
+    if exist "%fishstrap_path%" (
+        start /wait "" "%fishstrap_path%" --uninstall
+        echo Fishstrap uninstall initiated...
+    ) else (
+        echo Could not find Fishstrap installer!
+    )
+    pause
+    goto bootstrappers
+)
+
+if "%bs_choice%"=="7" goto menu
 
 echo Invalid choice!
 timeout /t 1 >nul
-goto download_mods
+goto bootstrappers
 
 :exec_discords
 cls
