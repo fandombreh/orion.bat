@@ -1,9 +1,9 @@
 @echo off
 title Orion Tools - Roblox Utilities
 color 0a
-mode con: cols=80 lines=25
+mode con: cols=80 lines=30
 
-:: Check for admin rights
+:: Admin check
 NET SESSION >nul 2>&1
 if %errorLevel% == 0 (
     set admin=ADMIN
@@ -21,7 +21,7 @@ echo.
 echo   1. Force Live Channel + Latest Version
 echo   2. Auto Downgrade Roblox
 echo   3. Download Bloxstrap / Fishstrap
-echo   4. Find Executor Discords (Krnl, Synapse, Fluxus, etc.)
+echo   4. Find Executor Discords
 echo   5. Kill Roblox Processes
 echo   6. Check Roblox Version
 echo   7. Exit
@@ -36,8 +36,8 @@ if "%choice%"=="5" goto kill_roblox
 if "%choice%"=="6" goto check_version
 if "%choice%"=="7" exit
 
-echo Invalid choice! Please try again.
-pause
+echo Invalid choice! Press any key to retry.
+pause >nul
 goto menu
 
 :force_live
@@ -205,11 +205,39 @@ goto menu
 :check_version
 cls
 echo Checking Roblox version...
-for /f "tokens=2 delims==" %%A in ('wmic datafile where "name='C:\\Program Files (x86)\\Roblox\\Versions\\RobloxPlayerBeta.exe'" get version /value') do set "roblox_version=%%A"
-if defined roblox_version (
-    echo Current Roblox Version: %roblox_version%
-) else (
-    echo Roblox not found or not installed!
+echo.
+
+:: Check common install locations
+set found=0
+for %%D in (
+    "%ProgramFiles(x86)%\Roblox\Versions\*"
+    "%LOCALAPPDATA%\Roblox\Versions\*"
+    "%ProgramW6432%\Roblox\Versions\*"
+) do (
+    if exist "%%D\RobloxPlayerBeta.exe" (
+        for /f "tokens=2 delims==" %%V in ('wmic datafile where "name='%%D\RobloxPlayerBeta.exe'" get version /value 2^>nul') do (
+            set "roblox_version=%%V"
+            set found=1
+            echo Installed Version: %%V (at %%D)
+        )
+    )
 )
+
+:: Check running processes
+tasklist /FI "IMAGENAME eq RobloxPlayerBeta.exe" 2>nul | find /I "RobloxPlayerBeta.exe" >nul
+if %errorlevel% == 0 (
+    echo.
+    echo Roblox is currently RUNNING
+) else (
+    echo.
+    echo Roblox is NOT running
+)
+
+if %found% == 0 (
+    echo.
+    echo Could not find Roblox installation!
+    echo Try running as Administrator if you have it installed.
+)
+
 pause
 goto menu
