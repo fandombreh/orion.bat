@@ -124,9 +124,13 @@ echo 1. Krnl
 echo 2. Synapse X
 echo 3. Fluxus
 echo 4. JJSploit
-echo 5. More Tools...
-echo 6. Back to menu
-set /p exec_choice=Choose (1-6): 
+echo 5. Swift
+echo 6. Xeno
+echo 7. Solara
+echo 8. AWP
+echo 9. More Tools...
+echo 10. Back to menu
+set /p exec_choice=Choose (1-10): 
 
 if "%exec_choice%"=="1" (
     echo Krnl Discord: https://discord.gg/krnl
@@ -153,13 +157,37 @@ if "%exec_choice%"=="4" (
     goto exec_discords
 )
 if "%exec_choice%"=="5" (
+    echo Swift: https://getswift.gg/
+    start "" "https://getswift.gg/"
+    pause
+    goto exec_discords
+)
+if "%exec_choice%"=="6" (
+    echo Xeno: https://www.xeno.now/
+    start "" "https://www.xeno.now/"
+    pause
+    goto exec_discords
+)
+if "%exec_choice%"=="7" (
+    echo Solara: https://getsolara.dev/
+    start "" "https://getsolara.dev/"
+    pause
+    goto exec_discords
+)
+if "%exec_choice%"=="8" (
+    echo AWP: https://discord.gg/awp
+    start "" "https://discord.gg/awp"
+    pause
+    goto exec_discords
+)
+if "%exec_choice%"=="9" (
     echo Other Tools:
     echo - Oxygen U: https://discord.gg/oxygenu
     echo - Comet: https://discord.gg/comet
     pause
     goto exec_discords
 )
-if "%exec_choice%"=="6" goto menu
+if "%exec_choice%"=="10" goto menu
 
 echo Invalid choice!
 pause
