@@ -3,7 +3,6 @@ title Orion Tools - Roblox Utilities
 color 0a
 mode con: cols=80 lines=30
 
-:: Admin check
 NET SESSION >nul 2>&1
 if %errorLevel% == 0 (
     set admin=ADMIN
@@ -43,7 +42,6 @@ goto menu
 :force_live
 cls
 echo Forcing Roblox to latest version...
-echo (This may require admin rights)
 timeout /t 2 >nul
 start "" "https://www.roblox.com/download"
 echo Done! Roblox should now update.
@@ -52,9 +50,9 @@ goto menu
 
 :downgrade
 cls
-echo Auto Downgrade Roblox (for exploit compatibility)
+echo Auto Downgrade Roblox
 echo.
-echo WARNING: This may break Roblox. Use at your own risk!
+echo WARNING: This may break Roblox.
 echo.
 echo 1. Downgrade to last working version
 echo 2. Restore to latest version
@@ -65,19 +63,14 @@ if "%downgrade_choice%"=="1" (
     echo Downgrading Roblox...
     taskkill /f /im RobloxPlayerBeta.exe >nul 2>&1
     timeout /t 1 >nul
-    echo Downloading older version...
     powershell -command "Invoke-WebRequest -Uri 'https://setup.rbxcdn.com/version-abc123-RobloxPlayer.exe' -OutFile 'RobloxPlayer.exe'"
-    echo Installing...
     start /wait RobloxPlayer.exe
-    echo Roblox downgraded!
     del RobloxPlayer.exe
     pause
     goto menu
 )
 if "%downgrade_choice%"=="2" (
-    echo Restoring Roblox to latest version...
     start "" "https://www.roblox.com/download"
-    echo Roblox restored!
     pause
     goto menu
 )
@@ -91,22 +84,18 @@ goto downgrade
 cls
 echo Download Roblox Mods:
 echo.
-echo 1. Bloxstrap (Custom Roblox Launcher)
-echo 2. Fishstrap (Alternative Mod)
+echo 1. Bloxstrap
+echo 2. Fishstrap
 echo 3. Back to menu
 set /p mod_choice=Choose (1-3): 
 
 if "%mod_choice%"=="1" (
-    echo Downloading Bloxstrap...
     start "" "https://github.com/bloxstraplabs/bloxstrap/releases/latest"
-    echo Check your browser for download.
     pause
     goto menu
 )
 if "%mod_choice%"=="2" (
-    echo Downloading Fishstrap...
     start "" "https://github.com/fishstrap/fishstrap/releases"
-    echo Check your browser for download.
     pause
     goto menu
 )
@@ -133,57 +122,48 @@ echo 10. Back to menu
 set /p exec_choice=Choose (1-10): 
 
 if "%exec_choice%"=="1" (
-    echo Krnl Discord: https://discord.gg/krnl
     start "" "https://discord.gg/krnl"
     pause
     goto exec_discords
 )
 if "%exec_choice%"=="2" (
-    echo Synapse X Discord: https://discord.gg/synapsex
     start "" "https://discord.gg/synapsex"
     pause
     goto exec_discords
 )
 if "%exec_choice%"=="3" (
-    echo Fluxus Discord: https://discord.gg/fluxusteam
     start "" "https://discord.gg/fluxusteam"
     pause
     goto exec_discords
 )
 if "%exec_choice%"=="4" (
-    echo JJSploit Discord: https://discord.gg/wearedevs
     start "" "https://discord.gg/wearedevs"
     pause
     goto exec_discords
 )
 if "%exec_choice%"=="5" (
-    echo Swift: https://getswift.gg/
     start "" "https://getswift.gg/"
     pause
     goto exec_discords
 )
 if "%exec_choice%"=="6" (
-    echo Xeno: https://www.xeno.now/
     start "" "https://www.xeno.now/"
     pause
     goto exec_discords
 )
 if "%exec_choice%"=="7" (
-    echo Solara: https://getsolara.dev/
     start "" "https://getsolara.dev/"
     pause
     goto exec_discords
 )
 if "%exec_choice%"=="8" (
-    echo AWP: https://discord.gg/awp
     start "" "https://discord.gg/awp"
     pause
     goto exec_discords
 )
 if "%exec_choice%"=="9" (
-    echo Other Tools:
-    echo - Oxygen U: https://discord.gg/oxygenu
-    echo - Comet: https://discord.gg/comet
+    echo Oxygen U: https://discord.gg/oxygenu
+    echo Comet: https://discord.gg/comet
     pause
     goto exec_discords
 )
@@ -195,49 +175,46 @@ goto exec_discords
 
 :kill_roblox
 cls
-echo Killing all Roblox processes...
 taskkill /f /im RobloxPlayerBeta.exe >nul 2>&1
 taskkill /f /im RobloxPlayerInstaller.exe >nul 2>&1
-echo Done! All Roblox processes terminated.
+echo Roblox processes terminated.
 pause
 goto menu
 
 :check_version
 cls
-echo Checking Roblox version...
+echo [ Roblox Version Check ]
+echo ------------------------
 echo.
 
-:: Check common install locations
 set found=0
-for %%D in (
-    "%ProgramFiles(x86)%\Roblox\Versions\*"
-    "%LOCALAPPDATA%\Roblox\Versions\*"
-    "%ProgramW6432%\Roblox\Versions\*"
-) do (
-    if exist "%%D\RobloxPlayerBeta.exe" (
-        for /f "tokens=2 delims==" %%V in ('wmic datafile where "name='%%D\RobloxPlayerBeta.exe'" get version /value 2^>nul') do (
-            set "roblox_version=%%V"
-            set found=1
-            echo Installed Version: %%V (at %%D)
-        )
+set client_found=0
+
+for /f "tokens=*" %%A in ('where /r "%LOCALAPPDATA%\Roblox\Versions" RobloxPlayerBeta.exe 2^>nul') do (
+    for /f "tokens=2 delims==" %%B in ('wmic datafile where "name='%%A'" get version /value 2^>nul') do (
+        set "player_version=%%B"
+        set "player_path=%%~dpA"
+        set found=1
+        echo Player Version: %%B
+        echo Path: %%~dpA
     )
 )
 
-:: Check running processes
-tasklist /FI "IMAGENAME eq RobloxPlayerBeta.exe" 2>nul | find /I "RobloxPlayerBeta.exe" >nul
-if %errorlevel% == 0 (
-    echo.
-    echo Roblox is currently RUNNING
-) else (
-    echo.
-    echo Roblox is NOT running
+for /f "tokens=*" %%A in ('where /r "%LOCALAPPDATA%\Roblox\Versions" Windows10Universal.exe 2^>nul') do (
+    for /f "tokens=2 delims==" %%B in ('wmic datafile where "name='%%A'" get version /value 2^>nul') do (
+        set "client_version=%%B"
+        set "client_path=%%~dpA"
+        set client_found=1
+        echo Game Client Version: %%B
+        echo Path: %%~dpA
+    )
 )
 
-if %found% == 0 (
-    echo.
-    echo Could not find Roblox installation!
-    echo Try running as Administrator if you have it installed.
-)
+tasklist | find /i "RobloxPlayerBeta.exe" >nul && echo Player is RUNNING || echo Player NOT running
+tasklist | find /i "Windows10Universal.exe" >nul && echo Game Client is RUNNING || echo Game Client NOT running
+
+if %found% == 0 echo Could not find Player installation!
+if %client_found% == 0 echo Could not find Game Client installation!
 
 pause
 goto menu
